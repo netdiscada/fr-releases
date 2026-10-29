@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0E1013">
+  <title>FR - Relatório Diário</title>
+  <script src="js/csp.js"></script>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FR">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/anim.css">
+</head>
+<body data-tela="carregando">
+  <header class="topo">
+    <button class="icone-btn" id="btnVoltar" aria-label="Voltar" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg><span>Voltar</span>
+    </button>
+    <div class="topo-marca">
+      <span class="topo-logo">FR</span>
+      <div>
+        <h1 id="topoTitulo">Relatório Diário</h1>
+        <p id="topoSub">SMSUZ · Mogi das Cruzes</p>
+      </div>
+    </div>
+    <button class="icone-btn" id="btnMenu" aria-label="Mais opções">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+    </button>
+  </header>
+
+  <!-- ===== Carregando ===== -->
+  <section class="tela" id="tela-carregando">
+    <div class="vazio"><div class="girando"></div><p>Abrindo…</p></div>
+  </section>
+
+  <!-- ===== Primeiro acesso: RGF ===== -->
+  <section class="tela" id="tela-rgf" hidden>
+    <main>
+      <p class="aviso" id="rgfAviso" hidden></p>
+
+      <div class="cartao cartao-solto rgf-passo" id="rgfPasso1">
+        <h2 class="titulo-tela">Bem-vindo!</h2>
+        <p class="dica">Digite o seu RGF. Ele fica salvo neste celular e vai em todas as suas FRs.</p>
+        <label class="campo"><span>RGF</span><input id="rgfNumero" inputmode="numeric" autocomplete="off" maxlength="10"></label>
+        <button type="button" class="btn btn-principal" id="btnRgfContinuar">Continuar</button>
+      </div>
+      <button type="button" class="btn btn-texto" id="btnRgfAdm">Entrar como ADM</button>
+
+      <div class="cartao cartao-solto rgf-passo" id="rgfPronto" hidden>
+        <h2 class="titulo-tela">É você?</h2>
+        <div class="info-linhas" id="rgfProntoDados"></div>
+        <button type="button" class="btn btn-principal" id="btnRgfSouEu">Sou eu, entrar</button>
+        <button type="button" class="btn btn-texto" data-rgf-voltar>Não sou eu</button>
+      </div>
+
+      <div class="cartao cartao-solto rgf-passo" id="rgfNovo" hidden>
+        <h2 class="titulo-tela">Primeiro acesso</h2>
+        <p class="dica">Este RGF ainda não está cadastrado. Preencha e o ADM vai liberar o seu acesso.</p>
+        <label class="campo"><span>Nome completo</span><input id="rgfNome" autocomplete="name" autocapitalize="words"></label>
+        <label class="campo"><span>Cargo / Função</span><input id="rgfCargo" autocapitalize="words" placeholder="Ex.: Motorista"></label>
+        <button type="button" class="btn btn-principal" id="btnRgfPedirAcesso">Pedir acesso</button>
+        <button type="button" class="btn btn-texto" data-rgf-voltar>Voltar</button>
+      </div>
+
+      <div class="cartao cartao-solto rgf-passo" id="rgfEspera" hidden>
+        <div class="espera-icone"><div class="girando"></div></div>
+        <h2 class="titulo-tela centro">Aguardando o ADM</h2>
+        <p class="dica centro" id="rgfEsperaTexto"></p>
+        <p class="dica centro">Pode fechar o app. Quando o ADM liberar, ele abre direto na próxima vez.</p>
+      </div>
+
+      <div class="cartao cartao-solto rgf-passo" id="rgfOcupado" hidden>
+        <h2 class="titulo-tela">RGF em outro celular</h2>
+        <p class="dica" id="rgfOcupadoTexto"></p>
+        <button type="button" class="btn btn-principal" id="btnPedirLiberacao">Pedir liberação ao ADM</button>
+        <button type="button" class="btn btn-texto" data-rgf-voltar>Voltar</button>
+      </div>
+    </main>
+  </section>
+
+  <!-- ===== Início / dia em andamento ===== -->
+  <section class="tela" id="tela-inicio" hidden>
+    <main id="inicio"></main>
+  </section>
+
+  <!-- ===== Nova parada (saída): toque no local ===== -->
+  <section class="tela" id="tela-parada" hidden>
+    <main id="parada"></main>
+    <footer class="barra-acao">
+      <button type="button" class="btn btn-principal" id="btnParadaContinuar">Continuar</button>
+    </footer>
+  </section>
+
+  <!-- ===== Chefe: FRs da equipe ===== -->
+  <section class="tela" id="tela-equipe" hidden>
+    <main id="equipe"></main>
+  </section>
+
+  <!-- ===== Chefe: preparar FR (passo a passo) ===== -->
+  <section class="tela" id="tela-preparar" hidden>
+    <div class="passos" id="prepararPassos"></div>
+    <div class="preparar-corpo">
+      <main id="preparar"></main>
+      <aside class="previa" id="prepararPrevia" hidden><h3 class="secao">Prévia do papel</h3><div id="prepararPapel"></div></aside>
+    </div>
+    <footer class="barra-acao">
+      <div class="barra-dupla" id="prepararRodape">
+        <button type="button" class="btn btn-claro" id="btnPrepararVoltar">Cancelar</button>
+        <button type="button" class="btn btn-claro" id="btnPrepararSo" hidden>Só salvar</button>
+        <button type="button" class="btn btn-principal" id="btnPrepararAvancar">Continuar</button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ===== Começar o dia (passo a passo) ===== -->
+  <section class="tela" id="tela-comecar" hidden>
+    <div class="passos" id="passosComecar"></div>
+    <main id="comecar"></main>
+    <footer class="barra-acao">
+      <div class="barra-dupla">
+        <button type="button" class="btn btn-claro" id="btnComecarVoltar">Voltar</button>
+        <button type="button" class="btn btn-principal" id="btnComecarAvancar">Continuar</button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ===== Encerrar o dia ===== -->
+  <section class="tela" id="tela-encerrar" hidden>
+    <main id="encerrar"></main>
+    <footer class="barra-acao">
+      <button type="button" class="btn btn-principal" id="btnEncerrar">Conferir e encerrar</button>
+    </footer>
+  </section>
+
+  <!-- ===== Ficha completa (revisar/editar tudo) ===== -->
+  <section class="tela" id="tela-ficha" hidden>
+    <div class="preparar-corpo corpo-ficha">
+    <main id="form">
+      <p class="aviso" id="fichaAdm" hidden></p>
+      <section class="cartao" data-secao="veiculo">
+        <button class="cartao-cab" type="button"><span class="cartao-num">1</span><span class="cartao-titulo">Veículo</span><span class="cartao-status"></span></button>
+        <div class="cartao-corpo">
+          <div class="chips" id="fichaVeiculos"></div>
+          <div class="grade">
+            <label class="campo"><span>Tombamento</span><input name="tombamento" autocomplete="off"></label>
+            <label class="campo"><span>Marca</span><input name="marca" autocapitalize="words"></label>
+            <label class="campo"><span>Modelo</span><input name="modelo"></label>
+            <label class="campo"><span>Placa</span><input name="placa" autocomplete="off" autocapitalize="characters"></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="cartao" data-secao="condutor">
+        <button class="cartao-cab" type="button"><span class="cartao-num">2</span><span class="cartao-titulo">Condutor</span><span class="cartao-status"></span></button>
+        <div class="cartao-corpo">
+          <div class="info-linhas" id="fichaCondutor"></div>
+          <p class="dica">Nome, RGF e cargo vêm do seu cadastro. Para trocar o RGF, use o menu ⋮ e peça ao ADM.</p>
+        </div>
+      </section>
+
+      <section class="cartao" data-secao="servico">
+        <button class="cartao-cab" type="button"><span class="cartao-num">3</span><span class="cartao-titulo">Serviço do dia</span><span class="cartao-status"></span></button>
+        <div class="cartao-corpo">
+          <label class="campo"><span>Data</span><input name="data" type="date"></label>
+          <label class="campo">
+            <span>Descrição dos serviços e locais</span>
+            <textarea name="descricao" rows="4" autocapitalize="sentences" placeholder="O que será feito e onde"></textarea>
+            <small class="medidor" data-medir="descricao"></small>
+          </label>
+        </div>
+      </section>
+
+      <section class="cartao" data-secao="saida">
+        <button class="cartao-cab" type="button"><span class="cartao-num">4</span><span class="cartao-titulo">Saída</span><span class="cartao-status"></span></button>
+        <div class="cartao-corpo">
+          <div class="grade">
+            <label class="campo"><span>Partida (km / horím.)</span><input name="partida_km" inputmode="numeric" autocomplete="off"></label>
+            <label class="campo"><span>Horário</span><span class="hora"><input name="partida_hora" type="time"><button type="button" class="agora" data-agora="partida_hora">Agora</button></span></label>
+          </div>
+          <div class="campo">
+            <span>Combustível</span>
+            <div class="segmentos" data-grupo="combustivel">
+              <button type="button" data-valor="cheio">Cheio</button>
+              <button type="button" data-valor="3/4">3/4</button>
+              <button type="button" data-valor="1/2">1/2</button>
+              <button type="button" data-valor="1/4">1/4</button>
+            </div>
+          </div>
+          <label class="campo"><span>Horário na portaria</span><span class="hora"><input name="portaria_hora" type="time"><button type="button" class="agora" data-agora="portaria_hora">Agora</button></span></label>
+        </div>
+      </section>
+
+      <section class="cartao" data-secao="checklist">
+        <button class="cartao-cab" type="button"><span class="cartao-num">5</span><span class="cartao-titulo">Inspeção do veículo</span><span class="cartao-status"></span></button>
+        <div class="cartao-corpo">
+          <div id="fichaChecklist"></div>
+        </div>
+      </section>
+
+      <section class="cartao" data-secao="itinerario">
+        <button class="cartao-cab" type="button"><span class="cartao-num">6</span><span class="cartao-titulo">Itinerário</span><span class="cartao-status"></span></button>
+        <div class="cartao-corpo">
+          <ol id="paradas" class="paradas"></ol>
+          <button type="button" class="btn btn-claro" id="btnParada">+ Adicionar parada</button>
+        </div>
+      </section>
+
+      <section class="cartao" data-secao="retorno">
+        <button class="cartao-cab" type="button"><span class="cartao-num">7</span><span class="cartao-titulo">Retorno e ocorrências</span><span class="cartao-status"></span></button>
+        <div class="cartao-corpo">
+          <div class="grade">
+            <label class="campo"><span>Retorno (km / horím.)</span><input name="retorno_km" inputmode="numeric" autocomplete="off"></label>
+            <label class="campo"><span>Horário</span><span class="hora"><input name="retorno_hora" type="time"><button type="button" class="agora" data-agora="retorno_hora">Agora</button></span></label>
+          </div>
+          <small class="aviso" id="avisoKm" hidden></small>
+          <label class="campo">
+            <span>Defeitos / Avarias</span>
+            <textarea name="defeitos" rows="3" autocapitalize="sentences" placeholder="Deixe em branco se não houver"></textarea>
+            <small class="medidor" data-medir="defeitos"></small>
+          </label>
+          <label class="campo">
+            <span>Descritivo de ocorrências</span>
+            <textarea name="ocorrencias" rows="3" autocapitalize="sentences" placeholder="Deixe em branco se não houver"></textarea>
+            <small class="medidor" data-medir="ocorrencias"></small>
+          </label>
+        </div>
+      </section>
+    </main>
+    <aside class="previa" id="fichaPrevia" hidden><h3 class="secao">Prévia do papel</h3><div id="fichaPapel"></div></aside>
+    </div>
+    <footer class="barra-acao">
+      <div class="barra-dupla barra-ficha">
+        <button type="button" class="btn btn-claro" id="btnFichaVoltar" hidden>Voltar</button>
+        <button type="button" class="btn btn-claro" id="btnFichaPdf">Gerar PDF</button>
+        <button type="button" class="btn btn-principal" id="btnFichaSalvar" hidden>Salvar</button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ===== ADM ===== -->
+  <section class="tela" id="tela-adm" hidden>
+    <nav class="abas" id="abasAdm">
+      <button type="button" data-aba="frota" class="ativa"><span class="aba-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 1 18 0"/><path d="m12 12 4-4"/><circle cx="12" cy="12" r="1.5"/><path d="M3 16h18"/></svg></span>Frota <span class="contador" id="contVeic" hidden></span></button>
+      <button type="button" data-aba="funcionarios"><span class="aba-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18 14a6 6 0 0 1 3.5 6"/></svg></span>Equipe <span class="contador" id="contFunc" hidden></span></button>
+      <button type="button" data-aba="frs"><span class="aba-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6"/></svg></span>FRs</button>
+      <button type="button" data-aba="locais"><span class="aba-icone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>Locais</button>
+    </nav>
+    <main id="adm"></main>
+  </section>
+
+  <!-- ===== Folhas (diálogos de baixo) ===== -->
+  <div class="folha" id="folhaAcoes" hidden>
+    <div class="folha-fundo" data-fechar></div>
+    <div class="folha-caixa" role="dialog" aria-labelledby="acoesTitulo">
+      <div class="folha-alca"></div>
+      <h2 id="acoesTitulo"></h2>
+      <p class="folha-texto" id="acoesTexto"></p>
+      <div class="lista-opcoes" id="acoesLista"></div>
+      <button type="button" class="btn btn-texto" data-fechar>Fechar</button>
+    </div>
+  </div>
+  <div class="folha" id="folhaPrevia" hidden>
+    <div class="folha-fundo" data-fechar></div>
+    <div class="folha-caixa previa-mini" id="previaMini" role="dialog" aria-label="Prévia da FR"></div>
+  </div>
+  <div class="folha" id="folhaPdf" hidden>
+    <div class="folha-fundo" data-fechar></div>
+    <div class="folha-caixa" role="dialog" aria-labelledby="folhaPdfTitulo">
+      <div class="folha-alca"></div>
+      <h2 id="folhaPdfTitulo">FR pronta</h2>
+      <p class="folha-texto" id="folhaPdfTexto"></p>
+      <button type="button" class="btn btn-principal" id="btnImprimirPdf">Imprimir</button>
+      <p class="dica" id="dicaImprimir" hidden>Na tela de impressão: Frente e verso → <b>Borda longa</b>.</p>
+      <button type="button" class="btn btn-claro" id="btnAbrirPdf">Abrir</button>
+      <button type="button" class="btn btn-claro" id="btnCompartilharPdf">Compartilhar</button>
+      <button type="button" class="btn btn-texto" data-fechar>Fechar</button>
+    </div>
+  </div>
+
+  <div class="folha" id="folhaMenu" hidden>
+    <div class="folha-fundo" data-fechar></div>
+    <div class="folha-caixa" role="dialog" aria-label="Mais opções">
+      <div class="folha-alca"></div>
+      <div class="menu-quem" id="menuQuem"></div>
+      <button type="button" class="btn btn-claro" id="btnMenuFicha">Ver ficha completa</button>
+      <button type="button" class="btn btn-claro" id="btnMenuTrocarRgf">Trocar RGF deste celular</button>
+      <button type="button" class="btn btn-claro" id="btnMenuAdm">Área do ADM</button>
+      <button type="button" class="btn btn-claro" id="btnInstalar" hidden>Instalar no celular</button>
+      <button type="button" class="btn btn-claro" id="btnAtualizar" hidden>Procurar atualização</button>
+      <button type="button" class="btn btn-claro" id="btnAnimacoes">Animações: ligadas</button>
+      <button type="button" class="btn btn-texto" data-fechar>Fechar</button>
+      <p class="versao" id="versao"></p>
+    </div>
+  </div>
+
+  <div class="folha" id="folhaAdmLogin" hidden>
+    <div class="folha-fundo" data-fechar></div>
+    <div class="folha-caixa" role="dialog" aria-labelledby="admLoginTitulo">
+      <div class="folha-alca"></div>
+      <h2 id="admLoginTitulo">Área do ADM</h2>
+      <label class="campo"><span>E-mail</span><input id="admEmail" type="email" autocomplete="username"></label>
+      <label class="campo"><span>Senha</span><input id="admSenha" type="password" autocomplete="current-password"></label>
+      <button type="button" class="btn btn-principal" id="btnAdmEntrar">Entrar</button>
+      <button type="button" class="btn btn-texto" data-fechar>Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Folha genérica preenchida por código (parada, veículo do ADM etc.) -->
+  <div class="folha" id="folhaForm" hidden>
+    <div class="folha-fundo" data-fechar></div>
+    <div class="folha-caixa" role="dialog" aria-labelledby="folhaFormTitulo">
+      <div class="folha-alca"></div>
+      <h2 id="folhaFormTitulo"></h2>
+      <div id="folhaFormCorpo"></div>
+      <button type="button" class="btn btn-principal" id="folhaFormOk"></button>
+      <button type="button" class="btn btn-texto" data-fechar>Cancelar</button>
+    </div>
+  </div>
+
+  <div class="folha" id="folhaConfirma" hidden>
+    <div class="folha-fundo" data-fechar></div>
+    <div class="folha-caixa" role="alertdialog" aria-labelledby="confirmaTitulo">
+      <div class="folha-alca"></div>
+      <h2 id="confirmaTitulo"></h2>
+      <p class="folha-texto" id="confirmaTexto"></p>
+      <button type="button" class="btn btn-perigo" id="confirmaSim"></button>
+      <button type="button" class="btn btn-texto" data-fechar>Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Visor da FR (chefe): as duas folhas lado a lado, só leitura -->
+  <div class="visor" id="visorPdf" hidden role="dialog" aria-labelledby="visorTitulo">
+    <div class="visor-topo">
+      <button type="button" class="icone-btn btn-voltar" id="visorFechar" aria-label="Voltar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg><span>Voltar</span>
+      </button>
+      <h2 id="visorTitulo"></h2>
+    </div>
+    <p class="visor-texto" id="visorTexto" hidden></p>
+    <div class="visor-folhas" id="visorFolhas"></div>
+    <div class="visor-acoes" id="visorAcoes"></div>
+  </div>
+
+  <div class="aviso-flutuante" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Páginas da FR para imprimir (versão site): só aparecem no papel -->
+  <div id="impressao" aria-hidden="true"></div>
+
+  <script src="vendor/pdf-lib.min.js"></script>
+  <script src="vendor/firebase-app-compat.js"></script>
+  <script src="vendor/firebase-auth-compat.js"></script>
+  <script src="vendor/firebase-firestore-compat.js"></script>
+  <script src="js/versao.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/icones.js"></script>
+  <script src="js/anim.js"></script>
+  <script src="js/imprimir.js"></script>
+  <script src="js/backup.js"></script>
+  <script src="js/checklist.js"></script>
+  <script src="js/frlista.js"></script>
+  <script src="js/ficha.js"></script>
+  <script src="js/dia.js"></script>
+  <script src="js/adm.js"></script>
+  <script src="js/chefe.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
